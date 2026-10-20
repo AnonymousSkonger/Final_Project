@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Appointment & Triage System (Django-Powered)</title>
+    <!-- FontAwesome for medical icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           Color Palette Variables (as provided)
+           Colors used: White, Deep Purple, Electric Blue, Charcoal Black, Light Green
+           ========================================================================== */
+        :root {
+            --bg-white: #ffffff;
+            --bg-light: #f8fafc;
+            --deep-purple: #2d1b4e;
+            --electric-blue: #3b82f6;
+            --light-green: #10b981;
+            --charcoal-black: #0f172a;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Base Styles & Reset */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        /* Header (Top Contact & Socials Bar) */
+        header {
+            background-color: var(--deep-purple);
+            color: var(--bg-white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 5%;
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .contact {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .contact span {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .contact i {
+            color: var(--light-green);
+        }
+
+        .social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social a {
+            color: var(--bg-white);
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .social a:hover {
+            background: var(--light-green);
+            color: var(--deep-purple);
+            transform: translateY(-2px);
+        }
+
+        /* Navigation */
+        nav {
+            background-color: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 0.8rem 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links li a {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links li a i {
+            color: var(--electric-blue);
+        }
+
+        .nav-links li a:hover,
+        .nav-links li a.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--electric-blue);
+        }
+
+        /* Hero Section */
+        #hero {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--deep-purple) 0%, #1e1035 100%);
+            color: var(--bg-white);
+            text-align: center;
+            padding: 4rem 1.5rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero-content .badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--light-green);
+            border: 1px solid var(--light-green);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--light-green);
+            color: var(--charcoal-black);
+        }
+
+        .btn-primary:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--bg-white);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--bg-white);
+        }
+
+        /* Shared Section Formatting */
+        section {
+            padding: 5rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            color: var(--deep-purple);
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+        }
+
+        /* About Me / Overview Section */
+        #about {
+            background-color: var(--bg-white);
+            border-radius: 16px;
+            margin-top: -3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 10;
+        }
+
+        .about-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-content h2 {
+            font-size: 2.2rem;
+            color: var(--deep-purple);
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .about-content h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--light-green);
+            margin-top: 0.4rem;
+            border-radius: 2px;
+        }
+
+        .about-content p {
+            margin-bottom: 1rem;
+            color: #334155;
+            font-size: 1.05rem;
+        }
+
+        .about-video {
+            display: flex;
+            justify-content: center;
+        }
+
+        .video-card {
+            width: 100%;
+            background: var(--charcoal-black);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            border: 2px solid var(--electric-blue);
+        }
+
+        .video-card .profile-img {
+            width: 100%;
+            display: block;
+            max-height: 320px;
+            object-fit: cover;
+        }
+
+        .video-caption {
+            display: block;
+            padding: 0.8rem;
+            background: var(--charcoal-black);
+            color: var(--bg-white);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .video-caption i {
+            color: var(--light-green);
+            margin-right: 0.4rem;
+        }
+
+        /* Interactive Portals */
+        .portal-section {
+            background-color: var(--bg-white);
+            border-radius: 16px;
+            margin: 2rem auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .portal-tabs {
+            display: flex;
+            background: var(--deep-purple);
+            border-radius: 16px 16px 0 0;
+            overflow: hidden;
+            flex-wrap: wrap;
+        }
+
+        .portal-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: var(--transition);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .portal-tab.active {
+            background: var(--bg-white);
+            color: var(--deep-purple);
+            box-shadow: inset 0 3px 0 var(--light-green);
+        }
+
+        .portal-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--bg-white);
+        }
+
+        .portal-panel {
+            padding: 2.5rem;
+            display: none;
+        }
+
+        .portal-panel.active {
+            display: block;
+        }
+
+        /* Dashboard UI elements inside portals */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--electric-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .stat-info h4 {
+            font-size: 1.5rem;
+            color: var(--deep-purple);
+        }
+
+        .stat-info p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Data Tables & Forms in Portals */
+        .portal-table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .urgent-row {
+            background-color: rgba(239, 68, 68, 0.08) !important;
+            border-left: 4px solid #ef4444;
+        }
+
+        .badge-urgent {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .badge-stable {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        /* Form Controls in Portals */
+        .inline-form {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .inline-form h3 {
+            margin-bottom: 1rem;
+            color: var(--deep-purple);
+            font-size: 1.2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .form-field label {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .form-field input, .form-field select {
+            padding: 0.7rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-white);
+            font-family: inherit;
+        }
+
+        /* Skills & Tech Stack Table Section */
+        .skills-table {
+            background: var(--bg-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background-color: var(--deep-purple);
+            color: var(--bg-white);
+        }
+
+        th {
+            padding: 1.2rem;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr.grey {
+            background-color: #f1f5f9;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--electric-blue);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.2rem 0.1rem;
+        }
+
+        /* Projects Section */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--electric-blue);
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.12);
+        }
+
+        .project-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(45, 27, 78, 0.08);
+            color: var(--deep-purple);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .project-icon:hover i {
+            color: #10b981;
+        }
+
+        .project-card h3 {
+            margin-bottom: 0.6rem;
+            color: var(--charcoal-black);
+        }
+
+        .project-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .project-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .project-tags span {
+            font-size: 0.75rem;
+            background: #f1f5f9;
+            color: var(--text-dark);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Contact Section */
+        #contact {
+            background-color: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        #contact-details h3 {
+            font-size: 1.8rem;
+            color: var(--deep-purple);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-intro {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .contact-list {
+            list-style: none;
+        }
+
+        .contact-list li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            font-size: 1rem;
+        }
+
+        .contact-list i {
+            width: 40px;
+            height: 40px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--light-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .contact-list a:hover {
+            color: var(--electric-blue);
+        }
+
+        /* Form Styles */
+        #contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        #contact-form input,
+        #contact-form textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background-color: #f8fafc;
+        }
+
+        #contact-form input:focus,
+        #contact-form textarea:focus {
+            outline: none;
+            border-color: var(--electric-blue);
+            background-color: var(--bg-white);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-submit {
+            background-color: var(--deep-purple);
+            color: var(--bg-white);
+            justify-content: center;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--charcoal-black);
+        }
+
+        .form-status {
+            padding: 0.8rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+            text-align: center;
+        }
+
+        .form-status.success {
+            display: block;
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--light-green);
+            border: 1px solid var(--light-green);
+        }
+
+        /* Footer Section */
+        footer {
+            background-color: var(--charcoal-black);
+            color: var(--bg-white);
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 4rem;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 850px) {
+            header {
+                flex-direction: column;
+                gap: 0.8rem;
+                text-align: center;
+            }
+
+            .contact {
+                justify-content: center;
+            }
+
+            .about-container,
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .nav-links li a {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="contact">
+            <span><i class="fa-solid fa-phone"></i> Emergency: +27 41 555 0192</span>
+            <span><i class="fa-solid fa-envelope"></i> triage@clinic-django.org</span>
+            <span><i class="fa-solid fa-location-dot"></i> Bethelsdorp Medical Centre, SA</span>
+        </div>
+        <div class="social">
+            <a href="#github" title="GitHub Repository"><i class="fa-brands fa-github"></i></a>
+            <a href="#django" title="Django Documentation"><i class="fa-solid fa-cube"></i></a>
+            <a href="#security" title="POPIA Compliant"><i class="fa-solid fa-shield-halved"></i></a>
+        </div>
+    </header>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="#hero" class="active"><i class="fa-solid fa-house"></i> Home / Overview</a></li>
+            <li><a href="#portals"><i class="fa-solid fa-user-nurse"></i> Receptionist Portal</a></li>
+            <li><a href="#portals"><i class="fa-solid fa-user-doctor"></i> Doctor Portal</a></li>
+            <li><a href="#portals"><i class="fa-solid fa-bed-pulse"></i> Patient Lookup</a></li>
+            <li><a href="#tech-stack"><i class="fa-solid fa-table-cells"></i> Tech Specs</a></li>
+            <li><a href="#contact"><i class="fa-solid fa-headset"></i> Support</a></li>
+        </ul>
+    </nav>
+
+    <section id="hero">
+        <div class="hero-content">
+            <span class="badge"><i class="fa-solid fa-bolt"></i> Django-Powered Healthcare System</span>
+            <h1>Smart Clinic Appointment & Triage System</h1>
+            <p>Bridging the gap between triage desks and specialized doctors. Ensuring urgent, life-threatening cases reach the correct medical professional without delay.</p>
+            <div class="hero-actions">
+                <a href="#portals" class="btn btn-primary"><i class="fa-solid fa-laptop-medical"></i> Open Portals Dashboard</a>
+                <a href="#about" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i> Learn About Stage 1</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="about-container">
+            <div class="about-content">
+                <h2>System Overview & Problem Statement</h2>
+                <p><strong>The Problem:</strong> Clinics and hospitals often experience severe friction in matching patients to the correct appointed doctor, leading to dangerous bottlenecks—especially in life-threatening situations.</p>
+                <p><strong>The Proposed Solution:</strong> Developed using Django, our platform gives receptionists an efficient command center to record patient ailments, match specialties (e.g., Cardiology for chest pains, Orthopedics for trauma), and flag urgent emergencies immediately.</p>
+                <p><strong>Who it's for:</strong> Receptionists manage scheduling and queue prioritization; Doctors verify expected patients and update consultation statuses; Patients gain transparency over arrival times and doctor assignments.</p>
+            </div>
+            <div class="about-video">
+                <div class="video-card">
+                    <img src="https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80" alt="Medical Triage Dashboard Preview" class="profile-img" onerror="this.src='https://placehold.co/600x320/0f172a/ffffff?text=Clinic+Triage+System'">
+                    <span class="video-caption"><i class="fa-solid fa-play-circle"></i> Live Django ORM & Triage Engine Preview</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portals">
+        <div class="section-header">
+            <h2>Interactive Role-Based Portals</h2>
+            <p>Test the system workflows for Receptionists, Doctors, and Patients in real-time.</p>
+        </div>
+
+        <div class="portal-section">
+            <div class="portal-tabs">
+                <button class="portal-tab active" onclick="switchPortal('receptionist')"><i class="fa-solid fa-user-nurse"></i> Receptionist Portal</button>
+                <button class="portal-tab" onclick="switchPortal('doctor')"><i class="fa-solid fa-user-doctor"></i> Doctor Portal</button>
+                <button class="portal-tab" onclick="switchPortal('patient')"><i class="fa-solid fa-bed-pulse"></i> Patient Portal Lookup</button>
+            </div>
+
+            <!-- Receptionist Portal Panel -->
+            <div id="panel-receptionist" class="portal-panel active">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info">
+                            <h4 id="stat-total">3 Active</h4>
+                            <p>Registered Patients</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info">
+                            <h4 id="stat-urgent">1 Critical</h4>
+                            <p>Urgent Flags</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--light-green);"><i class="fa-solid fa-stethoscope"></i></div>
+                        <div class="stat-info">
+                            <h4>4 Specialists</h4>
+                            <p>Available on Duty</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Patient & Appointment Form -->
+                <div class="inline-form">
+                    <h3><i class="fa-solid fa-user-plus"></i> Add New Patient & Assign Doctor (Stage 1 & 2)</h3>
+                    <form id="add-patient-form" onsubmit="handleAddNewPatient(event)">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Patient Full Name</label>
+                                <input type="text" id="p-name" placeholder="e.g. Sipho Nkosi" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Contact Number</label>
+                                <input type="text" id="p-contact" placeholder="082 555 1234" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Ailment / Reason</label>
+                                <input type="text" id="p-ailment" placeholder="e.g. Severe chest pains" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Assigned Specialist</label>
+                                <select id="p-doctor">
+                                    <option value="Dr. E. van der Merwe (Cardiology)">Dr. E. van der Merwe (Cardiology)</option>
+                                    <option value="Dr. T. Mokoena (Orthopedics)">Dr. T. Mokoena (Orthopedics)</option>
+                                    <option value="Dr. S. Naidoo (General Practice)">Dr. S. Naidoo (General Practice)</option>
+                                    <option value="Dr. L. Khumalo (Pediatrics)">Dr. L. Khumalo (Pediatrics)</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label>Appointment Time</label>
+                                <input type="time" id="p-time" value="15:30" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Urgency Level</label>
+                                <select id="p-urgent-flag">
+                                    <option value="false">Standard / Stable</option>
+                                    <option value="true">⚠️ Urgent / Life-Threatening</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Register Patient & Schedule</button>
+                    </form>
+                </div>
+
+                <h3 style="margin-bottom: 1rem; color: var(--deep-purple);"><i class="fa-solid fa-clipboard-list"></i> Active Patient & Appointment Records</h3>
+                <div class="portal-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Ailment</th>
+                                <th>Assigned Doctor</th>
+                                <th>Time</th>
+                                <th>Status / Flag</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receptionist-table-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Doctor Portal Panel -->
+            <div id="panel-doctor" class="portal-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h3 style="color: var(--deep-purple);">Doctor's Expected Queue</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">View incoming patients sorted by triage priority and appointment time.</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary btn-sm" style="color: var(--deep-purple); border-color: var(--border-color);" onclick="filterDoctorQueue('all')">All Patients</button>
+                        <button class="btn btn-primary btn-sm" onclick="filterDoctorQueue('urgent')">⚠️ Urgent First</button>
+                    </div>
+                </div>
+                <div class="portal-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Patient Name</th>
+                                <th>Ailment & Details</th>
+                                <th>Expected Time</th>
+                                <th>Consultation Status</th>
+                                <th>Update Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctor-table-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Patient Portal Panel -->
+            <div id="panel-patient" class="portal-panel">
+                <div class="inline-form" style="max-width: 600px; margin: 0 auto 2rem auto;">
+                    <h3><i class="fa-solid fa-magnifying-glass"></i> Patient Appointment Lookup</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Enter your name to instantly verify your assigned doctor, arrival time, and consultation room.</p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="lookup-input" placeholder="e.g. Sipho Nkosi" style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                        <button class="btn btn-primary btn-sm" onclick="handlePatientLookup()"><i class="fa-solid fa-search"></i> Check Status</button>
+                    </div>
+                </div>
+                <div id="lookup-result" style="max-width: 600px; margin: 0 auto; display: none; background: var(--bg-light); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px;">
+                    <!-- Result card rendered here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tech-stack">
+        <div class="section-header">
+            <h2>Django Tech Stack & Requirements Mapping</h2>
+            <p>How Python and Django features bring this medical system to life across development stages.</p>
+        </div>
+        <div class="skills-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Development Stage</th>
+                        <th>Django Component</th>
+                        <th>System Feature</th>
+                        <th>Implementation Tech Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Stage 1 (Core)</strong></td>
+                        <td>Django Models & Views</td>
+                        <td>Patient CRUD (Add, View, Update, Delete) & Doctor Assignment</td>
+                        <td>
+                            <span class="skill-tag">Python 3.11</span>
+                            <span class="skill-tag">Django ORM</span>
+                            <span class="skill-tag">SQLite</span>
+                        </td>
+                    </tr>
+                    <tr class="grey">
+                        <td><strong>Stage 2 (Triage)</strong></td>
+                        <td>Django Forms & Routing</td>
+                        <td>Specialty matching & Urgent flag visual alerts for medical staff</td>
+                        <td>
+                            <span class="skill-tag">Django Forms</span>
+                            <span class="skill-tag">URL Routing</span>
+                            <span class="skill-tag">CSS Grid</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stage 3 (Advanced)</strong></td>
+                        <td>Authentication & Security</td>
+                        <td>Role-based portal access (Receptionists, Doctors, Patients) & POPIA Compliance</td>
+                        <td>
+                            <span class="skill-tag">Django Auth</span>
+                            <span class="skill-tag">Permissions</span>
+                            <span class="skill-tag">Session Security</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="modules">
+        <div class="section-header">
+            <h2>Core System Modules</h2>
+            <p>Built with robustness, speed, and strict South African privacy standards (POPIA) in mind.</p>
+        </div>
+        <div class="projects-grid">
+            <div class="project-card">
+                <div class="project-icon"><i class="fa-solid fa-address-book"></i></div>
+                <h3>Patient Management</h3>
+                <p>Instant reception entry for personal details, contact information, and primary symptoms with zero lag.</p>
+                <div class="project-tags">
+                    <span>Django Models</span>
+                    <span>CRUD Views</span>
+                </div>
+            </div>
+            <div class="project-card">
+                <div class="project-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <h3>Triage & Specialty Matching</h3>
+                <p>Automatically filters ailments to suitable medical fields and highlights life-threatening cases.</p>
+                <div class="project-tags">
+                    <span>Urgent Flags</span>
+                    <span>Specialty Engine</span>
+                </div>
+            </div>
+            <div class="project-card">
+                <div class="project-icon"><i class="fa-solid fa-shield-user"></i></div>
+                <h3>Role-Based Security</h3>
+                <p>Guarantees that staff members and patients only view authorized clinical records and timetables.</p>
+                <div class="project-tags">
+                    <span>Django Auth</span>
+                    <span>POPIA Compliant</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="contact-container">
+            <div id="contact-details">
+                <h3>Clinic Staff & Admin Support</h3>
+                <p class="contact-intro">Need assistance configuring Django user permissions or integrating new specialist rosters? Reach out to our technical support desk.</p>
+                <ul class="contact-list">
+                    <li>
+                        <i class="fa-solid fa-phone"></i>
+                        <span>+27 41 555 0192 / +27 82 444 9876</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-envelope"></i>
+                        <a href="mailto:support@clinic-django.org">support@clinic-django.org</a>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>Bethelsdorp Health Complex, Eastern Cape, South Africa</span>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <form id="contact-form" onsubmit="handleContactSubmit(event)">
+                    <div class="form-group">
+                        <label>Your Name / Staff ID</label>
+                        <input type="text" placeholder="e.g. Nurse D. Adams" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="staff@clinic.org" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Inquiry / System Request</label>
+                        <textarea rows="4" placeholder="Describe the assistance needed..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-submit"><i class="fa-solid fa-paper-plane"></i> Send Inquiry</button>
+                    <div id="form-status" class="form-status success">Inquiry sent successfully! Our IT team will contact you shortly.</div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Clinic Appointment & Triage System. Developed with Python & Django. All rights reserved. POPIA Privacy Compliant.</p>
+    </footer>
+
+    <script>
+        // Initial Mock Patient Database
+        let patients = [
+            { id: 1, name: 'John Doe', contact: '083 456 7890', ailment: 'Acute Chest Pains', doctor: 'Dr. E. van der Merwe (Cardiology)', time: '09:00', urgent: true, status: 'Arrived' },
+            { id: 2, name: 'Jane Smith', contact: '072 123 4567', ailment: 'Severe Fracture in Right Arm', doctor: 'Dr. T. Mokoena (Orthopedics)', time: '10:15', urgent: false, status: 'Expected' },
+            { id: 3, name: 'Mandla Zulu', contact: '081 987 6543', ailment: 'Persistent High Fever', doctor: 'Dr. S. Naidoo (General Practice)', time: '11:00', urgent: false, status: 'Seen' }
+        ];
+
+        // Switch Portals function
+        function switchPortal(portalName) {
+            document.querySelectorAll('.portal-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.portal-panel').forEach(panel => panel.classList.remove('active'));
+
+            if(portalName === 'receptionist') {
+                document.querySelectorAll('.portal-tab')[0].classList.add('active');
+                document.getElementById('panel-receptionist').classList.add('active');
+            } else if(portalName === 'doctor') {
+                document.querySelectorAll('.portal-tab')[1].classList.add('active');
+                document.getElementById('panel-doctor').classList.add('active');
+                renderDoctorTable();
+            } else if(portalName === 'patient') {
+                document.querySelectorAll('.portal-tab')[2].classList.add('active');
+                document.getElementById('panel-patient').classList.add('active');
+            }
+            renderReceptionistTable();
+            updateStats();
+        }
+
+        // Render Receptionist Table
+        function renderReceptionistTable(data = patients) {
+            const tbody = document.getElementById('receptionist-table-body');
+            tbody.innerHTML = '';
+            data.forEach(p => {
+                const tr = document.createElement('tr');
+                if(p.urgent) tr.classList.add('urgent-row');
+                tr.innerHTML = `
+                    <td><strong>${p.name}</strong><br><small style="color:var(--text-muted)">${p.contact}</small></td>
+                    <td>${p.ailment}</td>
+                    <td>${p.doctor}</td>
+                    <td>${p.time}</td>
+                    <td>${p.urgent ? '<span class="badge-urgent"><i class="fa-solid fa-triangle-exclamation"></i> URGENT</span>' : '<span class="badge-stable">Stable</span>'}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn btn-secondary btn-sm" style="color:var(--deep-purple); border-color:var(--border-color);" onclick="deletePatient(${p.id})"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render Doctor Table
+        function renderDoctorTable(filter = 'all') {
+            const tbody = document.getElementById('doctor-table-body');
+            tbody.innerHTML = '';
+            
+            let list = [...patients];
+            if(filter === 'urgent') {
+                list = list.sort((a, b) => b.urgent - a.urgent);
+            }
+
+            list.forEach(p => {
+                const tr = document.createElement('tr');
+                if(p.urgent) tr.classList.add('urgent-row');
+                tr.innerHTML = `
+                    <td>${p.urgent ? '<span class="badge-urgent">CRITICAL</span>' : '<span class="badge-stable">Normal</span>'}</td>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.ailment}</td>
+                    <td>${p.time}</td>
+                    <td><span style="font-weight:600; color:var(--electric-blue);">${p.status}</span></td>
+                    <td>
+                        <select onchange="updateStatus(${p.id}, this.value)" style="padding:0.3rem; border-radius:4px; border:1px solid var(--border-color); font-size:0.85rem;">
+                            <option value="Expected" ${p.status === 'Expected'?'selected':''}>Expected</option>
+                            <option value="Arrived" ${p.status === 'Arrived'?'selected':''}>Arrived</option>
+                            <option value="Seen" ${p.status === 'Seen'?'selected':''}>Seen</option>
+                            <option value="Missed" ${p.status === 'Missed'?'selected':''}>Missed</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Add New Patient Handler
+        function handleAddNewPatient(e) {
+            e.preventDefault();
+            const name = document.getElementById('p-name').value;
+            const contact = document.getElementById('p-contact').value;
+            const ailment = document.getElementById('p-ailment').value;
+            const doctor = document.getElementById('p-doctor').value;
+            const time = document.getElementById('p-time').value;
+            const urgent = document.getElementById('p-urgent-flag').value === 'true';
+
+            const newPatient = {
+                id: Date.now(),
+                name,
+                contact,
+                ailment,
+                doctor,
+                time,
+                urgent,
+                status: 'Expected'
+            };
+
+            patients.push(newPatient);
+            renderReceptionistTable();
+            updateStats();
+            document.getElementById('add-patient-form').reset();
+            
+            // Show confirmation feedback
+            alertBox(`Successfully registered appointment for ${name}!`);
+        }
+
+        // Delete Patient
+        function deletePatient(id) {
+            patients = patients.filter(p => p.id !== id);
+            renderReceptionistTable();
+            updateStats();
+        }
+
+        // Update Status from Doctor View
+        function updateStatus(id, newStatus) {
+            const pat = patients.find(p => p.id === id);
+            if(pat) pat.status = newStatus;
+        }
+
+        // Filter Doctor Queue
+        function filterDoctorQueue(type) {
+            renderDoctorTable(type);
+        }
+
+        // Patient Lookup
+        function handlePatientLookup() {
+            const query = document.getElementById('lookup-input').value.toLowerCase().trim();
+            const resultDiv = document.getElementById('lookup-result');
+            if(!query) return;
+
+            const found = patients.find(p => p.name.toLowerCase().includes(query));
+            resultDiv.style.display = 'block';
+
+            if(found) {
+                resultDiv.innerHTML = `
+                    <h4 style="color:var(--deep-purple); margin-bottom:0.5rem;"><i class="fa-solid fa-circle-check" style="color:var(--light-green);"></i> Appointment Found</h4>
+                    <p><strong>Patient Name:</strong> ${found.name}</p>
+                    <p><strong>Assigned Doctor:</strong> ${found.doctor}</p>
+                    <p><strong>Expected Arrival Time:</strong> ${found.time}</p>
+                    <p><strong>Ailment Logged:</strong> ${found.ailment}</p>
+                    <p><strong>Status:</strong> <span style="color:var(--electric-blue); font-weight:600;">${found.status}</span></p>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h4 style="color:#ef4444; margin-bottom:0.5rem;"><i class="fa-solid fa-triangle-exclamation"></i> No Appointment Found</h4>
+                    <p style="color:var(--text-muted);">No records match "${query}". Please verify with reception desk.</p>
+                `;
+            }
+        }
+
+        // Update Stat counters
+        function updateStats() {
+            document.getElementById('stat-total').innerText = `${patients.length} Active`;
+            const urgentCount = patients.filter(p => p.urgent).length;
+            document.getElementById('stat-urgent').innerText = `${urgentCount} Critical`;
+        }
+
+        // Custom non-alert feedback
+        function alertBox(msg) {
+            const banner = document.createElement('div');
+            banner.style.position = 'fixed';
+            banner.style.bottom = '20px';
+            banner.style.right = '20px';
+            banner.style.background = 'var(--deep-purple)';
+            banner.style.color = '#fff';
+            banner.style.padding = '1rem 1.5rem';
+            banner.style.borderRadius = '8px';
+            banner.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
+            banner.style.zIndex = '9999';
+            banner.innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--light-green); margin-right:0.5rem;"></i> ${msg}`;
+            document.body.appendChild(banner);
+            setTimeout(() => banner.remove(), 3500);
+        }
+
+        // Contact Form Submission Handler
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            document.getElementById('form-status').style.display = 'block';
+            document.getElementById('contact-form').reset();
+            setTimeout(() => {
+                document.getElementById('form-status').style.display = 'none';
+            }, 4000);
+        }
+
+        // Initialize table on load
+        window.onload = function() {
+            renderReceptionistTable();
+            updateStats();
+        }
+    </script>
+</body>
+</html>
